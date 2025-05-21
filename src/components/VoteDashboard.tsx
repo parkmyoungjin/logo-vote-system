@@ -17,7 +17,7 @@ const VoteDashboard = () => {
   const votes = data?.votes || {};
 
   // 총 투표수 계산
-  const totalVotes = Object.values(votes).reduce((sum: number, count: any) => sum + (Number(count) || 0), 0);
+  const totalVotes = Object.values(votes).reduce((sum: number, count: number | unknown) => sum + (Number(count) || 0), 0);
 
   // 로고 카드 컴포넌트
   const LogoCard = ({ number, votes }: { number: number; votes: number }) => {
