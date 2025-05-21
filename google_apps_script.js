@@ -17,8 +17,8 @@ function doPost(e) {
     data.name,
     data.department,
     data.email,
-    data.logoId,
-    data.logoName,
+    data.logoIds,
+    data.logoNames,
     data.comment
   ]);
   

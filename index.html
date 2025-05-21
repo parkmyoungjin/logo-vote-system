@@ -302,7 +302,7 @@
     <div class="container">
         <header>
             <h1>로고 투표 시스템</h1>
-            <p>회사의 새 로고를 선택해 주세요. 가장 적합하다고 생각하는 디자인에 투표해 주시기 바랍니다.</p>
+            <p>회사의 새 로고를 선택해 주세요. 가장 적합하다고 생각하는 디자인을 최대 3개까지 선택할 수 있습니다.</p>
         </header>
         
         <form id="logo-vote-form">
@@ -321,7 +321,7 @@
             </div>
             
             <div class="form-group">
-                <label>로고 선택<span class="required-mark">*</span></label>
+                <label>로고 선택 (최대 3개)<span class="required-mark">*</span></label>
                 <div class="logo-grid-container">
                     <div class="logo-grid" id="logo-grid">
                         <!-- 로고는 자바스크립트로 동적 생성됩니다 -->
@@ -358,31 +358,38 @@
     </div>
     
     <script>
-        // 로고 데이터
-        const logoFiles = [
-            '시안#1.png',
-            '시안#2.png',
-            '시안#3.png',
-            '시안#4 (2).png',
-            '시안#5 (2).png',
-            '시안#6.png',
-            '시안#7.png',
-            '시안#8 (2).png',
-            '시안#9.png',
-            '시안#10.png',
-            '시안#11.png'
+        // 로고 데이터 - 이미지 파일명과 Base64 데이터를 저장할 객체
+        const logoData = [
+            { file: '시안#1.png', title: '시안 #1' },
+            { file: '시안#2.png', title: '시안 #2' },
+            { file: '시안#3.png', title: '시안 #3' },
+            { file: '시안#4 (2).png', title: '시안 #4' },
+            { file: '시안#5 (2).png', title: '시안 #5' },
+            { file: '시안#6.png', title: '시안 #6' },
+            { file: '시안#7.png', title: '시안 #7' },
+            { file: '시안#8 (2).png', title: '시안 #8' },
+            { file: '시안#9.png', title: '시안 #9' },
+            { file: '시안#10.png', title: '시안 #10' },
+            { file: '시안#11.png', title: '시안 #11' }
         ];
         
-        // 구글 스크립트 배포 URL (나중에 실제 URL로 변경해야 함)
-        const scriptURL = 'https://script.google.com/macros/s/AKfycby0CjV9wOUPPCafgKNYYP-O2Df0dlsPmCff66A6Yl5RfLmW0CM3jLaohfFikHoJ4YQu/exec';
+        // Base64 이미지 데이터 (실제 배포 시에는 이 부분에 Base64 인코딩된 이미지 데이터를 넣어주세요)
+        // 예: logoData[0].base64 = 'data:image/png;base64,ABCDEF...';
+        // 이 예제에서는 이미지 경로를 사용합니다
         
+        // 구글 스크립트 배포 URL
+        const scriptURL = 'https://script.google.com/macros/s/AKfycby0CjV9wOUPPCafgKNYYP-O2Df0dlsPmCff66A6Yl5RfLmW0CM3jLaohfFikHoJ4YQu/exec';
+        let selectedLogos = []; // 선택된 로고를 저장하는 배열
+
         document.addEventListener('DOMContentLoaded', function() {
             const logoGrid = document.getElementById('logo-grid');
+            const logoGridOverlay = document.getElementById('logo-grid-overlay');
+            
+            // 로고 로딩 표시
+            logoGridOverlay.style.display = 'flex';
             
             // 로고 카드 생성
-            logoFiles.forEach((file, index) => {
-                // 파일 경로를 웹에서 접근 가능한 형태로 변환 (실제 환경에 맞게 조정 필요)
-                // 여기서는 단순히 파일 이름만 사용
+            logoData.forEach((logoInfo, index) => {
                 const logoCard = document.createElement('div');
                 logoCard.className = 'logo-card';
                 logoCard.dataset.logoId = index + 1;
@@ -393,34 +400,85 @@
                 
                 const logoImg = document.createElement('img');
                 logoImg.className = 'logo-img';
-                logoImg.src = 'images/' + file; // 웹 서버에서의 이미지 경로
-                logoImg.alt = `로고 시안 #${index + 1}`;
                 
-                const logoInfo = document.createElement('div');
-                logoInfo.className = 'logo-info';
+                // Base64 데이터가 있으면 사용하고, 없으면 상대 경로 사용
+                // (실제 구현시에는 모든 이미지에 base64 데이터를 추가해야 함)
+                if (logoInfo.base64) {
+                    logoImg.src = logoInfo.base64;
+                } else {
+                    // 배포된 환경에서는 images 폴더의 상대 경로를 사용
+                    // Google Apps Script에서는 같은 폴더의 이미지를 참조할 수 없으므로 원격 URL 사용 필요
+                    logoImg.src = 'https://raw.githubusercontent.com/peterburwell-infor/logo-vote-system/main/images/' + logoInfo.file;
+                    
+                    // 테스트 환경에서는 로컬 경로도 시도
+                    logoImg.onerror = function() {
+                        this.src = 'images/' + logoInfo.file;
+                    };
+                }
+                
+                logoImg.alt = logoInfo.title;
+                
+                const logoInfo2 = document.createElement('div');
+                logoInfo2.className = 'logo-info';
                 
                 const logoTitle = document.createElement('div');
                 logoTitle.className = 'logo-title';
-                logoTitle.textContent = `시안 #${index + 1}`;
+                logoTitle.textContent = logoInfo.title;
                 
                 const selectionMark = document.createElement('div');
                 selectionMark.className = 'selection-mark';
                 selectionMark.innerHTML = '<i class="fas fa-check"></i>';
                 
-                logoInfo.appendChild(logoTitle);
+                logoInfo2.appendChild(logoTitle);
                 logoCard.appendChild(logoNumber);
                 logoCard.appendChild(logoImg);
-                logoCard.appendChild(logoInfo);
+                logoCard.appendChild(logoInfo2);
                 logoCard.appendChild(selectionMark);
                 
                 logoGrid.appendChild(logoCard);
                 
+                // 이미지 로딩 완료 확인
+                logoImg.onload = function() {
+                    // 모든 이미지 로딩 확인 (마지막 이미지인 경우)
+                    if (index === logoData.length - 1) {
+                        // 로고 로딩 오버레이 숨기기
+                        logoGridOverlay.style.display = 'none';
+                    }
+                };
+                
+                // 이미지 로딩 오류 처리
+                logoImg.onerror = function() {
+                    // 백업 경로로 다시 시도
+                    if (!this.src.includes('images/')) {
+                        this.src = 'images/' + logoInfo.file;
+                    } else {
+                        console.error('이미지 로딩 실패:', logoInfo.file);
+                        // 모든 이미지 시도했는데 마지막 이미지인 경우
+                        if (index === logoData.length - 1) {
+                            logoGridOverlay.style.display = 'none';
+                        }
+                    }
+                };
+                
                 // 로고 카드 클릭 이벤트
                 logoCard.addEventListener('click', function() {
-                    document.querySelectorAll('.logo-card').forEach(card => {
-                        card.classList.remove('selected');
-                    });
-                    this.classList.add('selected');
+                    const logoId = this.dataset.logoId;
+                    const index = selectedLogos.indexOf(logoId);
+                    
+                    if (index !== -1) {
+                        // 이미 선택된 경우 선택 취소
+                        selectedLogos.splice(index, 1);
+                        this.classList.remove('selected');
+                    } else {
+                        // 새로 선택하는 경우
+                        if (selectedLogos.length < 3) {
+                            selectedLogos.push(logoId);
+                            this.classList.add('selected');
+                        } else {
+                            alert('최대 3개까지만 선택할 수 있습니다.');
+                        }
+                    }
+                    
                     document.getElementById('logo-error').style.display = 'none';
                 });
             });
@@ -437,7 +495,6 @@
                 const name = document.getElementById('name').value.trim();
                 const department = document.getElementById('department').value.trim();
                 const email = document.getElementById('email').value.trim();
-                const selectedLogo = document.querySelector('.logo-card.selected');
                 const comment = document.getElementById('comment').value.trim();
                 
                 let isValid = true;
@@ -463,7 +520,7 @@
                     document.getElementById('email-error').style.display = 'none';
                 }
                 
-                if (!selectedLogo) {
+                if (selectedLogos.length === 0) {
                     document.getElementById('logo-error').style.display = 'block';
                     isValid = false;
                 } else {
@@ -480,8 +537,8 @@
                     formData.append('name', name);
                     formData.append('department', department);
                     formData.append('email', email);
-                    formData.append('logoId', selectedLogo.dataset.logoId);
-                    formData.append('logoName', `시안 #${selectedLogo.dataset.logoId}`);
+                    formData.append('logoIds', selectedLogos.join(','));
+                    formData.append('logoNames', selectedLogos.map(id => `시안 #${id}`).join(', '));
                     formData.append('comment', comment);
                     formData.append('timestamp', new Date().toISOString());
                     
