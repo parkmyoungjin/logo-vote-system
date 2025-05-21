@@ -20,4 +20,4 @@ imageFiles.forEach((file, idx) => {
   });
 });
 
-console.log(JSON.stringify(logoData, null, 2));
+console.log(JSON.stringify(logoData));
