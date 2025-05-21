@@ -1,0 +1,515 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로고 투표 시스템</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4285f4;
+            --secondary-color: #fbbc05;
+            --accent-color: #34a853;
+            --text-color: #333;
+            --light-grey: #f5f5f5;
+            --dark-grey: #777;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+        }
+        
+        body {
+            background-color: #f9f9f9;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        p {
+            color: var(--dark-grey);
+            font-size: 1.1rem;
+        }
+        
+        .logo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .logo-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .logo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .logo-card.selected {
+            border: 3px solid var(--primary-color);
+        }
+        
+        .logo-img {
+            width: 100%;
+            height: 200px;
+            object-fit: contain;
+            padding: 20px;
+            background-color: white;
+        }
+        
+        .logo-info {
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .logo-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text-color);
+        }
+        
+        .selection-mark {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--primary-color);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: var(--transition);
+        }
+        
+        .logo-card.selected .selection-mark {
+            opacity: 1;
+        }
+        
+        .form-group {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        button:hover {
+            background-color: #3367d6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        button i {
+            margin-right: 8px;
+        }
+        
+        .submit-container {
+            text-align: center;
+        }
+        
+        .error-message {
+            color: #d93025;
+            font-size: 0.9rem;
+            margin-top: -15px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .thank-you-message {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+        
+        .thank-you-message h2 {
+            color: var(--accent-color);
+            margin-bottom: 15px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .required-mark {
+            color: #d93025;
+            margin-left: 4px;
+        }
+        
+        .logo-grid-container {
+            position: relative;
+        }
+        
+        .logo-grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            display: none;
+        }
+        
+        .logo-number {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: var(--primary-color);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .logo-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 20px;
+            }
+            
+            .logo-img {
+                height: 150px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            header {
+                padding: 15px;
+                margin-bottom: 25px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>로고 투표 시스템</h1>
+            <p>회사의 새 로고를 선택해 주세요. 가장 적합하다고 생각하는 디자인에 투표해 주시기 바랍니다.</p>
+        </header>
+        
+        <form id="logo-vote-form">
+            <div class="form-group">
+                <label for="name">이름<span class="required-mark">*</span></label>
+                <input type="text" id="name" name="name" required>
+                <div class="error-message" id="name-error">이름을 입력해 주세요.</div>
+                
+                <label for="department">부서<span class="required-mark">*</span></label>
+                <input type="text" id="department" name="department" required>
+                <div class="error-message" id="department-error">부서를 입력해 주세요.</div>
+                
+                <label for="email">이메일<span class="required-mark">*</span></label>
+                <input type="email" id="email" name="email" required>
+                <div class="error-message" id="email-error">유효한 이메일 주소를 입력해 주세요.</div>
+            </div>
+            
+            <div class="form-group">
+                <label>로고 선택<span class="required-mark">*</span></label>
+                <div class="logo-grid-container">
+                    <div class="logo-grid" id="logo-grid">
+                        <!-- 로고는 자바스크립트로 동적 생성됩니다 -->
+                    </div>
+                    <div class="logo-grid-overlay" id="logo-grid-overlay">
+                        <div class="loading-spinner"></div>
+                        <p>로고 로딩 중...</p>
+                    </div>
+                </div>
+                <div class="error-message" id="logo-error">로고를 선택해 주세요.</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="comment">의견 (선택사항)</label>
+                <textarea id="comment" name="comment" rows="4" placeholder="선택하신 로고에 대한 의견이나 제안사항을 남겨주세요."></textarea>
+            </div>
+            
+            <div class="submit-container">
+                <button type="submit" id="submit-button">
+                    <i class="fas fa-paper-plane"></i> 제출하기
+                </button>
+            </div>
+        </form>
+        
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p>제출 중입니다...</p>
+        </div>
+        
+        <div class="thank-you-message" id="thank-you-message">
+            <h2><i class="fas fa-check-circle"></i> 투표가 완료되었습니다!</h2>
+            <p>참여해 주셔서 감사합니다. 투표 결과는 추후 공지됩니다.</p>
+        </div>
+    </div>
+    
+    <script>
+        // 로고 데이터
+        const logoFiles = [
+            '시안#1.png',
+            '시안#2.png',
+            '시안#3.png',
+            '시안#4 (2).png',
+            '시안#5 (2).png',
+            '시안#6.png',
+            '시안#7.png',
+            '시안#8 (2).png',
+            '시안#9.png',
+            '시안#10.png',
+            '시안#11.png'
+        ];
+        
+        // 구글 스크립트 배포 URL (나중에 실제 URL로 변경해야 함)
+        const scriptURL = 'https://script.google.com/macros/s/AKfycby0CjV9wOUPPCafgKNYYP-O2Df0dlsPmCff66A6Yl5RfLmW0CM3jLaohfFikHoJ4YQu/exec';
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const logoGrid = document.getElementById('logo-grid');
+            
+            // 로고 카드 생성
+            logoFiles.forEach((file, index) => {
+                // 파일 경로를 웹에서 접근 가능한 형태로 변환 (실제 환경에 맞게 조정 필요)
+                // 여기서는 단순히 파일 이름만 사용
+                const logoCard = document.createElement('div');
+                logoCard.className = 'logo-card';
+                logoCard.dataset.logoId = index + 1;
+                
+                const logoNumber = document.createElement('div');
+                logoNumber.className = 'logo-number';
+                logoNumber.textContent = index + 1;
+                
+                const logoImg = document.createElement('img');
+                logoImg.className = 'logo-img';
+                logoImg.src = 'images/' + file; // 웹 서버에서의 이미지 경로
+                logoImg.alt = `로고 시안 #${index + 1}`;
+                
+                const logoInfo = document.createElement('div');
+                logoInfo.className = 'logo-info';
+                
+                const logoTitle = document.createElement('div');
+                logoTitle.className = 'logo-title';
+                logoTitle.textContent = `시안 #${index + 1}`;
+                
+                const selectionMark = document.createElement('div');
+                selectionMark.className = 'selection-mark';
+                selectionMark.innerHTML = '<i class="fas fa-check"></i>';
+                
+                logoInfo.appendChild(logoTitle);
+                logoCard.appendChild(logoNumber);
+                logoCard.appendChild(logoImg);
+                logoCard.appendChild(logoInfo);
+                logoCard.appendChild(selectionMark);
+                
+                logoGrid.appendChild(logoCard);
+                
+                // 로고 카드 클릭 이벤트
+                logoCard.addEventListener('click', function() {
+                    document.querySelectorAll('.logo-card').forEach(card => {
+                        card.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                    document.getElementById('logo-error').style.display = 'none';
+                });
+            });
+            
+            // 폼 제출 이벤트
+            const form = document.getElementById('logo-vote-form');
+            const loadingElement = document.getElementById('loading');
+            const thankYouMessage = document.getElementById('thank-you-message');
+            
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // 폼 유효성 검사
+                const name = document.getElementById('name').value.trim();
+                const department = document.getElementById('department').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const selectedLogo = document.querySelector('.logo-card.selected');
+                const comment = document.getElementById('comment').value.trim();
+                
+                let isValid = true;
+                
+                if (!name) {
+                    document.getElementById('name-error').style.display = 'block';
+                    isValid = false;
+                } else {
+                    document.getElementById('name-error').style.display = 'none';
+                }
+                
+                if (!department) {
+                    document.getElementById('department-error').style.display = 'block';
+                    isValid = false;
+                } else {
+                    document.getElementById('department-error').style.display = 'none';
+                }
+                
+                if (!email || !isValidEmail(email)) {
+                    document.getElementById('email-error').style.display = 'block';
+                    isValid = false;
+                } else {
+                    document.getElementById('email-error').style.display = 'none';
+                }
+                
+                if (!selectedLogo) {
+                    document.getElementById('logo-error').style.display = 'block';
+                    isValid = false;
+                } else {
+                    document.getElementById('logo-error').style.display = 'none';
+                }
+                
+                if (isValid) {
+                    // 로딩 표시
+                    form.style.display = 'none';
+                    loadingElement.style.display = 'block';
+                    
+                    // 데이터 준비
+                    const formData = new FormData();
+                    formData.append('name', name);
+                    formData.append('department', department);
+                    formData.append('email', email);
+                    formData.append('logoId', selectedLogo.dataset.logoId);
+                    formData.append('logoName', `시안 #${selectedLogo.dataset.logoId}`);
+                    formData.append('comment', comment);
+                    formData.append('timestamp', new Date().toISOString());
+                    
+                    // 구글 스크립트에 데이터 제출
+                    fetch(scriptURL, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        loadingElement.style.display = 'none';
+                        thankYouMessage.style.display = 'block';
+                        console.log('Success!', response);
+                    })
+                    .catch(error => {
+                        console.error('Error!', error.message);
+                        loadingElement.style.display = 'none';
+                        form.style.display = 'block';
+                        alert('제출 중 오류가 발생했습니다. 다시 시도해 주세요.');
+                    });
+                }
+            });
+            
+            // 이메일 유효성 검사 함수
+            function isValidEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
+        });
+    </script>
+</body>
+</html>
