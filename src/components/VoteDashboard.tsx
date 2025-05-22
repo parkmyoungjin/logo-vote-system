@@ -54,8 +54,15 @@ const VoteDashboard = () => {
   // 총 투표수 계산
   const totalVotes = Object.values(votes).reduce((sum: number, count: number | unknown) => sum + (Number(count) || 0), 0);
 
+  // 상위 득표수 시안 번호 계산
+  const topVotedItems = Array.from({ length: 11 }, (_, i) => i + 1)
+    .map(number => ({ number, votes: Number(votes[number]) || 0 }))
+    .sort((a, b) => b.votes - a.votes)
+    .slice(0, 3)
+    .map(item => item.number);
+
   // 로고 카드 컴포넌트
-  const LogoCard = ({ number, votes }: { number: number; votes: number }) => {
+  const LogoCard = ({ number, votes, rank }: { number: number; votes: number, rank?: number }) => {
     // 백분율 계산 (소수점 1자리까지)
     const percentage = totalVotes > 0 ? ((votes / totalVotes) * 100).toFixed(1) : '0.0';
     const percentageValue = parseFloat(percentage);
@@ -68,6 +75,13 @@ const VoteDashboard = () => {
     
     // 게이지 바 컴포넌트를 위한 ref
     const progressBarRef = useRef<HTMLDivElement>(null);
+    
+    // 순위별 배지 색상 및 텍스트
+    const rankBadge = rank ? {
+      1: { bg: 'bg-yellow-500', text: '1위 🏆', shadow: 'shadow-yellow-300' },
+      2: { bg: 'bg-gray-400', text: '2위 🥈', shadow: 'shadow-gray-300' },
+      3: { bg: 'bg-amber-600', text: '3위 🥉', shadow: 'shadow-amber-300' }
+    }[rank] : null;
     
     // 애니메이션이 바뀔 때마다 게이지 바 업데이트
     useEffect(() => {
@@ -92,7 +106,14 @@ const VoteDashboard = () => {
     }, [animate, percentageValue]);
     
     return (
-      <div className="bg-white rounded-lg shadow-md p-4 flex flex-col items-center justify-center transition-all hover:shadow-lg">
+      <div className="bg-white rounded-lg shadow-md p-4 flex flex-col items-center justify-center transition-all hover:shadow-lg relative">
+        {/* 순위 배지 */}
+        {rankBadge && (
+          <div className={`absolute -top-3 -left-3 ${rankBadge.bg} text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg ${rankBadge.shadow} animate-pulse`}>
+            {rankBadge.text}
+          </div>
+        )}
+        
         <h2 className="text-lg font-bold mb-2">시안 #{number}</h2>
         
         {/* 로고 이미지 */}
@@ -197,9 +218,24 @@ const VoteDashboard = () => {
       <h2 className="text-lg text-center mb-4">사업로고 선호도 실시간 집계</h2>
       
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-        {Array.from({ length: 11 }, (_, i) => i + 1).map((number) => (
-          <LogoCard key={`${number}-${refreshKey}`} number={number} votes={votes[number] || 0} />
-        ))}
+        {Array.from({ length: 11 }, (_, i) => i + 1)
+          // 모든 시안 번호(1~11)에 대해 [번호, 투표수] 배열 생성
+          .map(number => [number, votes[number] || 0])
+          // 투표수 기준 내림차순 정렬
+          .sort(([, votesA], [, votesB]) => (Number(votesB) || 0) - (Number(votesA) || 0))
+          .map(([number, voteCount], index) => {
+            // 순위 계산 (index + 1: 1부터 시작하는 순위)
+            const rank = index < 3 ? index + 1 : undefined;
+            return (
+              <LogoCard 
+                key={`${number}-${refreshKey}`} 
+                number={number as number} 
+                votes={Number(voteCount) || 0}
+                rank={rank}
+              />
+            );
+          })
+        }
       </div>
 
       <div className="mt-6 text-center">
