@@ -30,6 +30,10 @@ const VoteDashboard = () => {
   // 데이터가 변경될 때마다 애니메이션 활성화
   useEffect(() => {
     if (data && !isLoading) {
+      // 디버깅용 - API 응답 데이터 콘솔에 출력
+      console.log('API Response Data:', data);
+      console.log('Total Participants:', data.totalParticipants);
+      
       setAnimate(true);
       
       // 10초 후 애니메이션 비활성화 (다음 업데이트를 위해)
