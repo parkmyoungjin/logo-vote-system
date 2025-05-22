@@ -17,7 +17,8 @@ const mockData = {
     9: 4,
     10: 11,
     11: 15
-  }
+  },
+  totalParticipants: 20  // 목업 데이터에 투표 인원수 추가
 };
 
 // Vercel 환경에서 JSON 문자열을 처리하기 위한 함수
@@ -86,7 +87,11 @@ export async function GET() {
     };
     
     // 첫 번째 행은 헤더이므로 건너뛰기
+    let totalParticipants = 0;
     if (rows.length > 1) {
+      // 헤더 제외한 행 수 = 총 투표 인원수 (A열 타임스탬프 카운트)
+      totalParticipants = rows.length - 1;
+      
       for (let i = 1; i < rows.length; i++) {
         const row = rows[i];
         
@@ -99,7 +104,7 @@ export async function GET() {
       }
     }
     
-    return NextResponse.json({ votes });
+    return NextResponse.json({ votes, totalParticipants });
   } catch (error) {
     console.error('Error fetching form responses:', error);
     return NextResponse.json(
