@@ -54,13 +54,6 @@ const VoteDashboard = () => {
   // 총 투표수 계산
   const totalVotes = Object.values(votes).reduce((sum: number, count: number | unknown) => sum + (Number(count) || 0), 0);
 
-  // 상위 득표수 시안 번호 계산
-  const topVotedItems = Array.from({ length: 11 }, (_, i) => i + 1)
-    .map(number => ({ number, votes: Number(votes[number]) || 0 }))
-    .sort((a, b) => b.votes - a.votes)
-    .slice(0, 3)
-    .map(item => item.number);
-
   // 로고 카드 컴포넌트
   const LogoCard = ({ number, votes, rank }: { number: number; votes: number, rank?: number }) => {
     // 백분율 계산 (소수점 1자리까지)
@@ -103,7 +96,7 @@ const VoteDashboard = () => {
           progressBarRef.current.style.width = `${percentageValue}%`;
         }
       }
-    }, [animate, percentageValue]);
+    }, [percentageValue]);
     
     return (
       <div className="bg-white rounded-lg shadow-md p-4 flex flex-col items-center justify-center transition-all hover:shadow-lg relative">
