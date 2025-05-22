@@ -45,6 +45,7 @@ const VoteDashboard = () => {
   if (error) return <div className="text-center p-10 text-red-500">데이터를 불러오는데 실패했습니다.</div>;
 
   const votes = data?.votes || {};
+  const totalParticipants = data?.totalParticipants || 0;
 
   // 총 투표수 계산
   const totalVotes = Object.values(votes).reduce((sum: number, count: number | unknown) => sum + (Number(count) || 0), 0);
@@ -209,6 +210,19 @@ const VoteDashboard = () => {
               />
             ) : (
               totalVotes
+            )}
+          </span>
+          <span className="mx-2">|</span>
+          총 참여자: <span className="text-green-600">
+            {animate ? (
+              <CountUp
+                start={0}
+                end={totalParticipants}
+                duration={2}
+                useEasing={true}
+              />
+            ) : (
+              totalParticipants
             )}
           </span>
         </div>
